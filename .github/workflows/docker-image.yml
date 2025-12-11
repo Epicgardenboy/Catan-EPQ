@@ -29,6 +29,7 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@v6
         with:
+          file: ./Dockerfile.web
           tags: "${{ vars.DOCKER_USER }}/catan-epq:latest"
           # For pull requests, export results to the build cache.
           # Otherwise, push to a registry.
