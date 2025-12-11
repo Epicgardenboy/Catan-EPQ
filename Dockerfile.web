@@ -1,5 +1,18 @@
 # Build Command:
 # docker build -t bcollazo/catanatron-server:latest . -f Dockerfile.web
+
+# Stage 1: Build UI
+FROM node:20 AS ui-builder
+
+WORKDIR /app/ui
+
+COPY ui/package*.json ./
+RUN npm ci
+
+COPY ui/ ./
+RUN npm run build
+
+# Stage 2: Build backend
 FROM python:3.12
 
 WORKDIR /app
@@ -8,6 +21,9 @@ RUN pip install --upgrade pip
 
 COPY . .
 RUN pip install -e .[web]
+
+# Copy built UI from stage 1
+COPY --from=ui-builder /app/ui/dist /app/catanatron/web/static/build
 
 EXPOSE 5001
 
