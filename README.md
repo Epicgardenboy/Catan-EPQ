@@ -12,7 +12,7 @@ Get Started with the Full Documentation: https://docs.catanatron.com
 Join our Discord: https://discord.gg/FgFmb75TWd!
 
 ## Command Line Interface
-Catanatron provides a `catanatron-play` CLI tool to run large scale simulations.
+Catanatron provides a `catanatron-play` CLI tool to run large scale simulations
 
 <p align="left">
  <img src="https://raw.githubusercontent.com/bcollazo/catanatron/master/docs/source/_static/cli.gif">
