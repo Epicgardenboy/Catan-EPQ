@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: catanatron
+  labels:
+    app: catanatron
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: catanatron
+  template:
+    metadata:
+      labels:
+        app: catanatron
+    spec:
+      containers:
+        - name: catanatron
+          image: gcr.io/PROJECT_ID/catanatron-server:latest
+          ports:
+            - containerPort: 5001
+          env:
+            - name: FLASK_DEBUG
+              value: "0"
+            - name: FLASK_APP
+              value: "catanatron.web"
+            - name: FLASK_RUN_HOST
+              value: "0.0.0.0"
+            - name: FLASK_RUN_PORT
+              value: "5001"
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "250m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 5001
+            initialDelaySeconds: 10
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 5001
+            initialDelaySeconds: 15
+            periodSeconds: 10
