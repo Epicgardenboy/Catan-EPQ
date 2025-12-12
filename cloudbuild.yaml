@@ -1,6 +1,7 @@
 steps:
   # Step 1: Build the Docker image
   - name: 'gcr.io/cloud-builders/docker'
+    id: Build
     args:
       - 'build'
       - '-t'
@@ -11,84 +12,37 @@ steps:
       - 'Dockerfile.web'
       - '.'
 
-  # Step 2: Push the image with commit SHA tag
+  # Step 2: Push the image to Container Registry
   - name: 'gcr.io/cloud-builders/docker'
+    id: Push
     args:
       - 'push'
       - 'gcr.io/$PROJECT_ID/catanatron-server:$COMMIT_SHA'
 
-  # Step 3: Push the image with latest tag
+  # Step 3: Push the latest tag
   - name: 'gcr.io/cloud-builders/docker'
+    id: PushLatest
     args:
       - 'push'
       - 'gcr.io/$PROJECT_ID/catanatron-server:latest'
 
-  # Step 4: Update the deployment.yaml with the correct project ID and image tag
-  - name: 'gcr.io/cloud-builders/gcloud'
-    entrypoint: 'bash'
+  # Step 4: Deploy to Cloud Run
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    id: Deploy
+    entrypoint: gcloud
     args:
-      - '-c'
-      - |
-        sed -i "s|gcr.io/PROJECT_ID/catanatron-server:latest|gcr.io/$PROJECT_ID/catanatron-server:$COMMIT_SHA|g" k8s/deployment.yaml
-
-  # Step 5: Get GKE credentials
-  - name: 'gcr.io/cloud-builders/gcloud'
-    args:
-      - 'container'
-      - 'clusters'
-      - 'get-credentials'
-      - '${_GKE_CLUSTER}'
-      - '--region=${_GKE_REGION}'
-      - '--project=$PROJECT_ID'
-
-  # Step 6: Delete old stuck pods to force fresh deployment
-  - name: 'gcr.io/cloud-builders/kubectl'
-    entrypoint: 'bash'
-    args:
-      - '-c'
-      - |
-        kubectl delete pods -l app=catanatron --force --grace-period=0 || true
-    env:
-      - 'CLOUDSDK_COMPUTE_REGION=${_GKE_REGION}'
-      - 'CLOUDSDK_CONTAINER_CLUSTER=${_GKE_CLUSTER}'
-
-  # Step 7: Apply Kubernetes deployment
-  - name: 'gcr.io/cloud-builders/kubectl'
-    args:
-      - 'apply'
-      - '-f'
-      - 'k8s/deployment.yaml'
-    env:
-      - 'CLOUDSDK_COMPUTE_REGION=${_GKE_REGION}'
-      - 'CLOUDSDK_CONTAINER_CLUSTER=${_GKE_CLUSTER}'
-
-  # Step 8: Apply Kubernetes service
-  - name: 'gcr.io/cloud-builders/kubectl'
-    args:
-      - 'apply'
-      - '-f'
-      - 'k8s/service.yaml'
-    env:
-      - 'CLOUDSDK_COMPUTE_REGION=${_GKE_REGION}'
-      - 'CLOUDSDK_CONTAINER_CLUSTER=${_GKE_CLUSTER}'
-
-  # Step 9: Check deployment status (non-blocking - Autopilot may take time to provision)
-  - name: 'gcr.io/cloud-builders/kubectl'
-    entrypoint: 'bash'
-    args:
-      - '-c'
-      - |
-        kubectl get deployment catanatron -o wide
-        kubectl get pods -l app=catanatron -o wide
-        kubectl rollout status deployment/catanatron --timeout=60s || true
-    env:
-      - 'CLOUDSDK_COMPUTE_REGION=${_GKE_REGION}'
-      - 'CLOUDSDK_CONTAINER_CLUSTER=${_GKE_CLUSTER}'
-
-# Substitution variables - update these to match your GKE cluster
-substitutions:
-  _GKE_CLUSTER: 'catan-epq'  # Your GKE cluster name
-  _GKE_REGION: 'europe-west1'          # Your GKE cluster region
+      - 'run'
+      - 'deploy'
+      - 'catan-epq'
+      - '--image'
+      - 'gcr.io/$PROJECT_ID/catanatron-server:$COMMIT_SHA'
+      - '--region'
+      - 'europe-west1'
+      - '--platform'
+      - 'managed'
+      - '--port'
+      - '5001'
+      - '--allow-unauthenticated'
 
 # Use Cloud Logging only (required when using a custom service account)
 options:
