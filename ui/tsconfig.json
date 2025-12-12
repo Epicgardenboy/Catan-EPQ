@@ -1,6 +1,7 @@
 {
   "extends": "@tsconfig/vite-react/tsconfig.json",
   "compilerOptions": {
+    "jsx": "react",
     "types": ["vitest/globals", "@testing-library/jest-dom", "vite/client"],
     "target": "es2021",
     "lib": ["ES2021", "DOM", "DOM.Iterable"],
