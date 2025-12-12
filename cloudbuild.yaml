@@ -74,7 +74,7 @@ steps:
 
 # Substitution variables - update these to match your GKE cluster
 substitutions:
-  _GKE_CLUSTER: 'catanatron-cluster'  # Your GKE cluster name
+  _GKE_CLUSTER: 'catan-epq'  # Your GKE cluster name
   _GKE_REGION: 'europe-west1'          # Your GKE cluster region
 
 # Use Cloud Logging only (required when using a custom service account)
