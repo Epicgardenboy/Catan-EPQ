@@ -1,12 +1,15 @@
 import os
 
-from flask import Flask
+from flask import Flask, send_from_directory
 from flask_cors import CORS
 
 
 def create_app(test_config=None):
     """Create and configure an instance of the Flask application."""
-    app = Flask(__name__)
+    # Get the path to the static build folder
+    static_folder = os.path.join(os.path.dirname(__file__), 'static', 'build')
+    
+    app = Flask(__name__, static_folder=static_folder, static_url_path='')
     CORS(app)
 
     # ===== Load base configuration
@@ -33,5 +36,16 @@ def create_app(test_config=None):
     from . import api
 
     app.register_blueprint(api.bp)
+
+    # ===== Serve React App
+    @app.route('/')
+    def serve():
+        return send_from_directory(app.static_folder, 'index.html')
+
+    @app.route('/<path:path>')
+    def serve_static(path):
+        if os.path.exists(os.path.join(app.static_folder, path)):
+            return send_from_directory(app.static_folder, path)
+        return send_from_directory(app.static_folder, 'index.html')
 
     return app
