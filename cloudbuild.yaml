@@ -41,7 +41,18 @@ steps:
       - '--region=${_GKE_REGION}'
       - '--project=$PROJECT_ID'
 
-  # Step 6: Apply Kubernetes deployment
+  # Step 6: Delete old stuck pods to force fresh deployment
+  - name: 'gcr.io/cloud-builders/kubectl'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        kubectl delete pods -l app=catanatron --force --grace-period=0 || true
+    env:
+      - 'CLOUDSDK_COMPUTE_REGION=${_GKE_REGION}'
+      - 'CLOUDSDK_CONTAINER_CLUSTER=${_GKE_CLUSTER}'
+
+  # Step 7: Apply Kubernetes deployment
   - name: 'gcr.io/cloud-builders/kubectl'
     args:
       - 'apply'
@@ -51,7 +62,7 @@ steps:
       - 'CLOUDSDK_COMPUTE_REGION=${_GKE_REGION}'
       - 'CLOUDSDK_CONTAINER_CLUSTER=${_GKE_CLUSTER}'
 
-  # Step 7: Apply Kubernetes service
+  # Step 8: Apply Kubernetes service
   - name: 'gcr.io/cloud-builders/kubectl'
     args:
       - 'apply'
@@ -61,12 +72,13 @@ steps:
       - 'CLOUDSDK_COMPUTE_REGION=${_GKE_REGION}'
       - 'CLOUDSDK_CONTAINER_CLUSTER=${_GKE_CLUSTER}'
 
-  # Step 8: Wait for deployment rollout to complete
+  # Step 9: Wait for deployment rollout to complete (with timeout)
   - name: 'gcr.io/cloud-builders/kubectl'
     args:
       - 'rollout'
       - 'status'
       - 'deployment/catanatron'
+      - '--timeout=300s'
     env:
       - 'CLOUDSDK_COMPUTE_REGION=${_GKE_REGION}'
       - 'CLOUDSDK_CONTAINER_CLUSTER=${_GKE_CLUSTER}'
