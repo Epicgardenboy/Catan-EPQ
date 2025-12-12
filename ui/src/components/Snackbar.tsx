@@ -21,7 +21,11 @@ export const snackbarActions = (closeSnackbar: (key?: SnackbarKey) => void) => (
   );
 
 export function dispatchSnackbar(enqueueSnackbar: (message: string, options: { action: (key: string) => React.ReactNode;  onClick: () => void }) => SnackbarKey , closeSnackbar: (key?: string | number) => void, gameState: GameState) {
-  enqueueSnackbar(humanizeAction(gameState, gameState.actions.slice(-1)[0]), {
+  const lastAction = gameState.actions.slice(-1)[0];
+  if (!lastAction) {
+    return; // No actions to display
+  }
+  enqueueSnackbar(humanizeAction(gameState, lastAction), {
     action: snackbarActions(closeSnackbar),
     onClick: () => {
       closeSnackbar();

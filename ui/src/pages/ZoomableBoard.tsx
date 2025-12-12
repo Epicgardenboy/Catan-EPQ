@@ -152,7 +152,7 @@ export default function ZoomableBoard({ replayMode }: ZoomableBoardProps) {
     }, 300);
   }, []);
 
-  if (!width || !height) return;
+  if (!width || !height) return null;
 
   return (
     <TransformWrapper>

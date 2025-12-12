@@ -328,6 +328,7 @@ def apply_action(state: State, action: Action):
     Returns:
         Action: Fully-specified action
     """
+    fully_specified_action = action  # Default to original action
 
     if action.action_type == ActionType.END_TURN:
         apply_end_turn(state, action)
@@ -338,9 +339,9 @@ def apply_action(state: State, action: Action):
     elif action.action_type == ActionType.BUILD_CITY:
         apply_build_city(state, action)
     elif action.action_type == ActionType.BUY_DEVELOPMENT_CARD:
-        apply_buy_development_card(state, action)
+        fully_specified_action = apply_buy_development_card(state, action)
     elif action.action_type == ActionType.ROLL:
-        apply_roll(state, action)
+        fully_specified_action = apply_roll(state, action)
     elif action.action_type == ActionType.DISCARD:
         apply_discard(state, action)
     elif action.action_type == ActionType.MOVE_ROBBER:
@@ -368,8 +369,8 @@ def apply_action(state: State, action: Action):
     else:
         raise ValueError("Unknown ActionType " + str(action.action_type))
 
-    state.actions.append(action)
-    return action
+    state.actions.append(fully_specified_action)
+    return fully_specified_action
 
 
 def reset_trading_state(state):
@@ -507,10 +508,10 @@ def apply_buy_development_card(state: State, action: Action):
         state.resource_freqdeck, DEVELOPMENT_CARD_COST_FREQDECK
     )
 
-    action = Action(action.color, action.action_type, card)
     # state.current_player_index stays the same
     # state.current_prompt stays as PLAY
     state.playable_actions = generate_playable_actions(state)
+    return Action(action.color, action.action_type, card)
 
 
 def apply_roll(state: State, action: Action):
@@ -519,7 +520,7 @@ def apply_roll(state: State, action: Action):
 
     dices = action.value or roll_dice()
     number = dices[0] + dices[1]
-    action = Action(action.color, action.action_type, dices)
+    fully_specified_action = Action(action.color, action.action_type, dices)
 
     if number == 7:
         discarders = [
@@ -549,6 +550,7 @@ def apply_roll(state: State, action: Action):
         # state.current_player_index stays the same
         state.current_prompt = ActionPrompt.PLAY_TURN
         state.playable_actions = generate_playable_actions(state)
+    return fully_specified_action
 
 
 def apply_discard(state: State, action: Action):
