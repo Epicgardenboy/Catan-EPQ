@@ -23,7 +23,7 @@ COPY . .
 RUN pip install -e .[web]
 
 # Copy built UI from stage 1
-COPY --from=ui-builder /app/ui/dist /app/catanatron/web/static/build
+COPY --from=ui-builder /app/ui/dist /app/catanatron/catanatron/web/static/build
 
 EXPOSE 5001
 
