@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { Button } from "@mui/material";
 import { GridLoader } from "react-spinners";
 import { createGame } from "../utils/apiClient";
@@ -94,6 +94,14 @@ export default function HomePage() {
             >
               Watch Catanatron
             </Button>
+            <Link to="/advisor" style={{ textDecoration: 'none', marginTop: '20px' }}>
+              <Button
+                variant="outlined"
+                style={{ color: 'white', borderColor: 'white' }}
+              >
+                AI Advisor
+              </Button>
+            </Link>
           </>
         ) : (
           <GridLoader

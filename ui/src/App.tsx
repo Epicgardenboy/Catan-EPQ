@@ -6,6 +6,7 @@ import Fade from "@mui/material/Fade";
 
 import GameScreen from "./pages/GameScreen";
 import HomePage from "./pages/HomePage";
+import AdvisorScreen from "./pages/AdvisorScreen";
 import { StateProvider } from "./store";
 
 import "./App.scss";
@@ -47,6 +48,7 @@ function App() {
                 path="/games/:gameId"
                 element={<GameScreen replayMode={false} />}
               />
+              <Route path="/advisor" element={<AdvisorScreen />} />
               <Route path="/" element={<HomePage />} />
             </Routes>
           </Router>

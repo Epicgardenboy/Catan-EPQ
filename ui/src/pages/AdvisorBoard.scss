@@ -1,0 +1,278 @@
+@use "sass:color";
+@use "../variables.scss";
+
+.advisor-board {
+  position: relative;
+  background: #1a4a7a;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+// Tile styles
+.tile {
+  position: absolute;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transform: scale(1.02);
+  cursor: default;
+  transition: all 0.2s ease;
+
+  &.clickable {
+    cursor: pointer;
+
+    &:hover {
+      transform: scale(1.08);
+      z-index: 10;
+    }
+  }
+
+  &.empty {
+    background: rgba(255, 255, 255, 0.1);
+    border: 2px dashed rgba(255, 255, 255, 0.3);
+    clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+  }
+
+  &.highlighted.empty {
+    border-color: variables.$blue;
+    background: rgba(33, 150, 243, 0.2);
+  }
+
+  .empty-tile-label {
+    font-size: 0.6rem;
+    color: rgba(255, 255, 255, 0.5);
+    text-align: center;
+  }
+}
+
+// Port styles
+.port-tile {
+  position: absolute;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: default;
+  transition: all 0.2s ease;
+
+  &.clickable {
+    cursor: pointer;
+
+    &:hover {
+      transform: scale(1.1);
+      z-index: 10;
+    }
+  }
+
+  &.highlighted {
+    filter: brightness(1.2);
+  }
+
+  .port-label {
+    font-size: 0.7rem;
+    font-weight: bold;
+    color: white;
+    text-shadow: 0 0 4px black;
+    position: absolute;
+    bottom: 5px;
+  }
+}
+
+// Number token
+.number-token {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: bold;
+  background: variables.$dark-gray !important;
+  color: white;
+  border-radius: 50%;
+
+  .pips {
+    font-size: 0.4rem;
+    letter-spacing: -1px;
+  }
+}
+
+// Node styles (settlements/cities)
+.node {
+  position: absolute;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: default;
+  transition: all 0.15s ease;
+
+  &.clickable {
+    cursor: pointer;
+
+    &:hover {
+      transform: translateY(-50%) translateX(-50%) scale(1.3);
+      z-index: 20;
+    }
+  }
+
+  .settlement {
+    width: 80%;
+    height: 80%;
+    border-radius: 4px;
+    border: 2px solid variables.$dark-gray;
+  }
+
+  .city {
+    width: 100%;
+    height: 100%;
+    border-radius: 4px;
+  }
+
+  // Colors
+  .RED {
+    background: variables.$red;
+
+    &.city {
+      border: 4px solid variables.$red;
+      background: variables.$dark-gray;
+    }
+  }
+
+  .BLUE {
+    background: variables.$blue;
+
+    &.city {
+      border: 4px solid variables.$blue;
+      background: variables.$dark-gray;
+    }
+  }
+
+  .ORANGE {
+    background: variables.$orange;
+
+    &.city {
+      border: 4px solid variables.$orange;
+      background: variables.$dark-gray;
+    }
+  }
+
+  .WHITE {
+    background: white;
+
+    &.city {
+      border: 4px solid white;
+      background: variables.$dark-gray;
+    }
+  }
+}
+
+// Edge styles (roads)
+.edge {
+  position: absolute;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: default;
+  transition: all 0.15s ease;
+  // Make hitbox visible for debugging - remove later
+  // background: rgba(255, 0, 0, 0.1);
+
+  &.clickable {
+    cursor: pointer;
+
+    &:hover {
+      z-index: 15;
+      
+      .pulse {
+        background: rgba(255, 255, 255, 0.5);
+      }
+    }
+  }
+
+  .road {
+    position: absolute;
+    border: 1px solid variables.$dark-gray;
+    width: 100%;
+    height: 35%; // Road is thinner than hitbox
+    border-radius: 3px;
+
+    &.RED {
+      background: variables.$red;
+    }
+
+    &.BLUE {
+      background: variables.$blue;
+    }
+
+    &.ORANGE {
+      background: variables.$orange;
+    }
+
+    &.WHITE {
+      background: white;
+    }
+  }
+}
+
+// Pulse animation for interactive elements
+.pulse {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translateX(-50%) translateY(-50%);
+  width: 100%;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+  animation: pulse 1.5s ease-in-out infinite;
+
+  &:after {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    display: block;
+    width: 100%;
+    height: 100%;
+    background-color: white;
+    border-radius: 4px;
+    box-shadow: 0 0 8px rgba(0, 0, 0, 0.3);
+    animation: pulse-ring 1.5s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+  }
+}
+
+@keyframes pulse {
+  0% {
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.6;
+  }
+}
+
+@keyframes pulse-ring {
+  0% {
+    transform: scale(0.5);
+    opacity: 0.8;
+  }
+  80%,
+  100% {
+    transform: scale(1.5);
+    opacity: 0;
+  }
+}
+
+// Robber
+.robber {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #6b6b6b !important;
+  z-index: 5;
+  font-size: 0.8rem;
+  pointer-events: none;
+}

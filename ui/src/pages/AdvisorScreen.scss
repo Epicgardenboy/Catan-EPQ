@@ -1,0 +1,461 @@
+@use "sass:color";
+@use "../variables.scss";
+
+.advisor-screen {
+  min-height: 100vh;
+  background: variables.$black;
+  color: white;
+  display: flex;
+  flex-direction: column;
+}
+
+.advisor-header {
+  display: flex;
+  align-items: center;
+  padding: 16px 24px;
+  background: variables.$dark-gray;
+  border-bottom: 1px solid #333;
+
+  .home-button {
+    color: white;
+    margin-right: 16px;
+  }
+
+  h1 {
+    margin: 0;
+    font-size: 1.5rem;
+    color: white;
+  }
+}
+
+.advisor-content {
+  display: flex;
+  flex: 1;
+  padding: 16px;
+  gap: 16px;
+  overflow: auto;
+
+  @media screen and (max-width: 1200px) {
+    flex-direction: column;
+  }
+}
+
+.setup-panel {
+  width: 300px;
+  min-width: 280px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-height: calc(100vh - 100px);
+  overflow-y: auto;
+
+  @media screen and (max-width: 1200px) {
+    width: 100%;
+    flex-direction: row;
+    flex-wrap: wrap;
+
+    .setup-section {
+      flex: 1;
+      min-width: 280px;
+    }
+  }
+}
+
+.setup-section {
+  padding: 16px;
+  background: variables.$dark-gray !important;
+  border-radius: 8px;
+
+  h3 {
+    margin: 0 0 16px 0;
+    font-size: 1rem;
+    color: white;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    
+    .scroll-hint {
+      font-size: 0.7rem;
+      font-weight: normal;
+      color: #888;
+      font-style: italic;
+    }
+  }
+
+  .form-control {
+    margin-bottom: 12px;
+
+    .MuiInputLabel-root {
+      color: #aaa;
+    }
+
+    .MuiOutlinedInput-root {
+      color: white;
+
+      fieldset {
+        border-color: #555;
+      }
+
+      &:hover fieldset {
+        border-color: #888;
+      }
+
+      &.Mui-focused fieldset {
+        border-color: variables.$blue;
+      }
+    }
+
+    .MuiSelect-icon {
+      color: #aaa;
+    }
+  }
+
+  .MuiTabs-root {
+    margin-bottom: 12px;
+    min-height: 36px;
+
+    .MuiTab-root {
+      color: #aaa;
+      min-height: 36px;
+      padding: 6px 12px;
+      font-size: 0.75rem;
+
+      &.Mui-selected {
+        color: white;
+      }
+    }
+
+    .MuiTabs-indicator {
+      background-color: variables.$blue;
+    }
+  }
+}
+
+.phase-instructions {
+  p {
+    margin: 0 0 12px 0;
+    color: #aaa;
+    font-size: 0.875rem;
+  }
+
+  .piece-instructions {
+    margin: 0 0 12px 0;
+    padding-left: 20px;
+    color: #aaa;
+    font-size: 0.8rem;
+    
+    li {
+      margin-bottom: 4px;
+    }
+    
+    strong {
+      color: #ccc;
+    }
+  }
+}
+
+.placement-buttons {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+
+  button {
+    flex: 1;
+    min-width: 80px;
+    font-size: 0.75rem;
+  }
+}
+
+.color-dot {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  margin-right: 8px;
+
+  &.RED {
+    background: variables.$red;
+  }
+  &.BLUE {
+    background: variables.$blue;
+  }
+  &.ORANGE {
+    background: variables.$orange;
+  }
+  &.WHITE {
+    background: white;
+    border: 1px solid #333;
+  }
+}
+
+.resource-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.resource-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 0;
+  border-bottom: 1px solid #333;
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  .resource-name {
+    font-size: 0.875rem;
+    text-transform: capitalize;
+    display: flex;
+    align-items: center;
+    color: white;
+
+    &.wood {
+      color: variables.$wood;
+    }
+    &.brick {
+      color: variables.$brick;
+    }
+    &.sheep {
+      color: variables.$sheep;
+    }
+    &.wheat {
+      color: variables.$wheat;
+    }
+    &.ore {
+      color: variables.$ore;
+    }
+  }
+
+  .resource-controls {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+
+    .MuiIconButton-root {
+      color: white;
+      padding: 4px;
+
+      &:hover {
+        background: rgba(255, 255, 255, 0.1);
+      }
+    }
+
+    .resource-count {
+      min-width: 24px;
+      text-align: center;
+      font-weight: bold;
+    }
+  }
+}
+
+.board-panel {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  min-width: 500px;
+
+  @media screen and (max-width: 1200px) {
+    min-width: 100%;
+  }
+}
+
+.advice-panel {
+  width: 350px;
+  min-width: 300px;
+
+  @media screen and (max-width: 1200px) {
+    width: 100%;
+  }
+}
+
+.advice-section {
+  padding: 16px;
+  background: variables.$dark-gray !important;
+  border-radius: 8px;
+
+  h3 {
+    margin: 0 0 16px 0;
+    font-size: 1rem;
+    color: white;
+  }
+
+  h4 {
+    margin: 16px 0 8px 0;
+    font-size: 0.875rem;
+    color: white;
+  }
+
+  .get-advice-button {
+    margin-bottom: 16px;
+  }
+
+  .warning {
+    color: #ffa500;
+    font-size: 0.875rem;
+    margin: 8px 0;
+  }
+
+  .loading-container {
+    display: flex;
+    justify-content: center;
+    padding: 24px;
+  }
+
+  .error-message {
+    color: #ff4444;
+    padding: 12px;
+    background: rgba(255, 68, 68, 0.1);
+    border-radius: 4px;
+    margin: 8px 0;
+
+    p {
+      margin: 0;
+    }
+  }
+
+  .advice-content {
+    .recommended-action {
+      background: rgba(33, 150, 243, 0.1);
+      border: 1px solid variables.$blue;
+      border-radius: 4px;
+      padding: 12px;
+
+      .action-type {
+        font-weight: bold;
+        font-size: 1rem;
+        margin: 0 0 4px 0;
+        color: variables.$blue;
+      }
+
+      .action-value {
+        margin: 0;
+        font-size: 0.875rem;
+        color: #aaa;
+      }
+    }
+
+    .explanation {
+      font-size: 0.875rem;
+      line-height: 1.5;
+      color: white;
+      margin: 0;
+    }
+
+    .vp-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+
+      .vp-row {
+        display: flex;
+        align-items: center;
+        font-size: 0.875rem;
+        color: white;
+      }
+    }
+
+    .actions-list {
+      max-height: 200px;
+      overflow-y: auto;
+      background: #1a1a1a;
+      border-radius: 4px;
+      padding: 8px;
+
+      .action-item {
+        font-size: 0.75rem;
+        padding: 4px 8px;
+        border-bottom: 1px solid #333;
+        color: white;
+
+        &:last-child {
+          border-bottom: none;
+        }
+      }
+
+      .more-actions {
+        font-size: 0.75rem;
+        color: #aaa;
+        margin: 8px 0 0 0;
+        text-align: center;
+      }
+    }
+  }
+}
+
+// Dialog styling
+.MuiDialog-paper {
+  background: variables.$dark-gray !important;
+  color: white;
+
+  .MuiDialogTitle-root {
+    color: white;
+  }
+
+  .MuiDialogContent-root {
+    color: white;
+  }
+
+  .dialog-form-control {
+    margin: 16px 0;
+    min-width: 250px;
+
+    .MuiInputLabel-root {
+      color: #aaa;
+    }
+
+    .MuiOutlinedInput-root {
+      color: white;
+
+      fieldset {
+        border-color: #555;
+      }
+
+      &:hover fieldset {
+        border-color: #888;
+      }
+
+      &.Mui-focused fieldset {
+        border-color: variables.$blue;
+      }
+    }
+
+    .MuiSelect-icon {
+      color: #aaa;
+    }
+    
+    &.Mui-disabled {
+      .MuiOutlinedInput-root {
+        color: #666;
+        
+        fieldset {
+          border-color: #333;
+        }
+      }
+      
+      .MuiInputLabel-root {
+        color: #555;
+      }
+    }
+  }
+  
+  .dialog-hint {
+    margin: 8px 0 0 0;
+    font-size: 0.8rem;
+    color: #888;
+    font-style: italic;
+  }
+
+  .MuiButton-root {
+    color: white;
+  }
+}
+
+.MuiMenuItem-root {
+  display: flex;
+  align-items: center;
+}
