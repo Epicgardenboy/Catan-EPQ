@@ -218,6 +218,27 @@ export default function AdvisorScreen() {
     return allTilesSet && desertCount === 1 && tileConfigs.size > 0;
   }, [tileConfigs]);
 
+  // Extract recommended node/edge from advice for highlighting on board
+  const recommendedNode = useMemo(() => {
+    if (!advice?.action_value) return null;
+    // BUILD_SETTLEMENT, BUILD_CITY actions have node_id as value
+    if (advice.action_type === "BUILD_SETTLEMENT" || advice.action_type === "BUILD_CITY") {
+      return typeof advice.action_value === "number" ? advice.action_value : null;
+    }
+    return null;
+  }, [advice]);
+  
+  const recommendedEdge = useMemo((): [number, number] | null => {
+    if (!advice?.action_value) return null;
+    // BUILD_ROAD action has edge as [node1, node2] tuple
+    if (advice.action_type === "BUILD_ROAD") {
+      if (Array.isArray(advice.action_value) && advice.action_value.length === 2) {
+        return advice.action_value as [number, number];
+      }
+    }
+    return null;
+  }, [advice]);
+
   // Update tile configuration
   const updateTileConfig = useCallback((resource: ResourceCard | "DESERT" | null, number: number | null) => {
     if (!selectedTile) return;
@@ -374,6 +395,156 @@ export default function AdvisorScreen() {
       return newMap;
     });
   }, []);
+
+  // Generate a random board and game state for testing
+  const generateRandomBoard = useCallback(() => {
+    if (!boardTemplate) return;
+    
+    // Standard Catan resources: 4 wood, 4 sheep, 4 wheat, 3 brick, 3 ore, 1 desert
+    const resourcePool: (ResourceCard | "DESERT")[] = [
+      "WOOD", "WOOD", "WOOD", "WOOD",
+      "SHEEP", "SHEEP", "SHEEP", "SHEEP", 
+      "WHEAT", "WHEAT", "WHEAT", "WHEAT",
+      "BRICK", "BRICK", "BRICK",
+      "ORE", "ORE", "ORE",
+      "DESERT"
+    ];
+    
+    // Standard Catan numbers
+    const numberPool = [2, 3, 3, 4, 4, 5, 5, 6, 6, 8, 8, 9, 9, 10, 10, 11, 11, 12];
+    
+    // Shuffle arrays
+    const shuffleArray = <T,>(arr: T[]): T[] => {
+      const result = [...arr];
+      for (let i = result.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [result[i], result[j]] = [result[j], result[i]];
+      }
+      return result;
+    };
+    
+    const shuffledResources = shuffleArray(resourcePool);
+    const shuffledNumbers = shuffleArray(numberPool);
+    
+    // Assign resources and numbers to tiles
+    const newTileConfigs = new Map<string, TileConfig>();
+    let desertCoord: TileCoordinate | null = null;
+    let resourceIdx = 0;
+    let numberIdx = 0;
+    
+    const landTilesList = boardTemplate.tiles.filter(t => t.type !== "PORT");
+    landTilesList.forEach(tile => {
+      const coordStr = tile.coordinate.toString();
+      const resource = shuffledResources[resourceIdx++];
+      
+      if (resource === "DESERT") {
+        newTileConfigs.set(coordStr, { resource: "DESERT", number: null });
+        desertCoord = tile.coordinate;
+      } else {
+        newTileConfigs.set(coordStr, { 
+          resource: resource, 
+          number: shuffledNumbers[numberIdx++] 
+        });
+      }
+    });
+    
+    setTileConfigs(newTileConfigs);
+    setRobberCoordinate(desertCoord);
+    
+    // Random port configuration: 4 resource ports (one each of wood, brick, sheep, wheat, ore - but only 4), 4 generic 3:1
+    const portResources: (ResourceCard | null)[] = [
+      "WOOD", "BRICK", "SHEEP", "WHEAT", "ORE", null, null, null, null
+    ];
+    const shuffledPortResources = shuffleArray(portResources);
+    
+    const newPortConfigs = new Map<string, PortConfig>();
+    const portTilesList = boardTemplate.tiles.filter(t => t.type === "PORT");
+    portTilesList.forEach((tile, idx) => {
+      const coordStr = tile.coordinate.toString();
+      newPortConfigs.set(coordStr, { resource: shuffledPortResources[idx] || null });
+    });
+    setPortConfigs(newPortConfigs);
+    
+    // Generate random pieces for each active player
+    const newNodeStates = new Map<number, NodeState>();
+    const newEdgeStates = new Map<string, EdgeState>();
+    
+    // Get all node IDs that are on land
+    const landNodeIds = new Set<number>();
+    boardTemplate.nodes.forEach(node => {
+      // Check if node is on any land tile
+      const isOnLand = node.tile_coordinates?.some(coord => {
+        const coordStr = coord.toString();
+        return newTileConfigs.has(coordStr);
+      });
+      if (isOnLand) {
+        landNodeIds.add(node.id);
+      }
+    });
+    
+    const availableNodes = shuffleArray(Array.from(landNodeIds));
+    const usedNodes = new Set<number>();
+    
+    // Place 2 settlements per player (respecting distance rule roughly)
+    activeColors.forEach(color => {
+      let settlementsPlaced = 0;
+      for (const nodeId of availableNodes) {
+        if (settlementsPlaced >= 2) break;
+        if (usedNodes.has(nodeId)) continue;
+        
+        // Check distance rule (no adjacent settlements) - simplified check
+        const node = boardTemplate.nodes.find(n => n.id === nodeId);
+        if (!node) continue;
+        
+        // Find adjacent nodes via edges
+        const adjacentNodes = new Set<number>();
+        boardTemplate.edges.forEach(edge => {
+          if (edge.node_ids[0] === nodeId) adjacentNodes.add(edge.node_ids[1]);
+          if (edge.node_ids[1] === nodeId) adjacentNodes.add(edge.node_ids[0]);
+        });
+        
+        const hasAdjacentSettlement = Array.from(adjacentNodes).some(adjId => usedNodes.has(adjId));
+        if (hasAdjacentSettlement) continue;
+        
+        newNodeStates.set(nodeId, { color, building: "SETTLEMENT" });
+        usedNodes.add(nodeId);
+        // Also mark adjacent nodes as "used" for distance rule
+        adjacentNodes.forEach(adjId => usedNodes.add(adjId));
+        settlementsPlaced++;
+        
+        // Place a road from this settlement
+        const connectedEdges = boardTemplate.edges.filter(
+          e => e.node_ids[0] === nodeId || e.node_ids[1] === nodeId
+        );
+        if (connectedEdges.length > 0) {
+          const randomEdge = connectedEdges[Math.floor(Math.random() * connectedEdges.length)];
+          const edgeKey = `${Math.min(randomEdge.node_ids[0], randomEdge.node_ids[1])},${Math.max(randomEdge.node_ids[0], randomEdge.node_ids[1])}`;
+          if (!newEdgeStates.has(edgeKey)) {
+            newEdgeStates.set(edgeKey, { color });
+          }
+        }
+      }
+    });
+    
+    setNodeStates(newNodeStates);
+    setEdgeStates(newEdgeStates);
+    
+    // Give the advised player some random resources
+    setPlayerStates(prev => {
+      const newMap = new Map(prev);
+      const playerState = { ...newMap.get(advisedPlayer)! };
+      playerState.resources = {
+        WOOD: Math.floor(Math.random() * 4),
+        BRICK: Math.floor(Math.random() * 4),
+        SHEEP: Math.floor(Math.random() * 4),
+        WHEAT: Math.floor(Math.random() * 4),
+        ORE: Math.floor(Math.random() * 4),
+      };
+      newMap.set(advisedPlayer, playerState);
+      return newMap;
+    });
+    
+  }, [boardTemplate, activeColors, advisedPlayer]);
 
   // Get advice from AI
   const handleGetAdvice = useCallback(async () => {
@@ -557,6 +728,15 @@ export default function AdvisorScreen() {
                 ))}
               </Select>
             </FormControl>
+            
+            <Button 
+              variant="outlined" 
+              fullWidth 
+              onClick={generateRandomBoard}
+              style={{ marginTop: 8 }}
+            >
+              Generate Random Board
+            </Button>
           </Paper>
 
           <Paper className="setup-section">
@@ -756,6 +936,8 @@ export default function AdvisorScreen() {
             setupPhase={setupPhase}
             highlightNodes={setupPhase === "pieces" && placementType !== "ROAD"}
             highlightEdges={setupPhase === "pieces" && placementType === "ROAD"}
+            recommendedNode={recommendedNode}
+            recommendedEdge={recommendedEdge}
           />
         </div>
 
@@ -794,9 +976,15 @@ export default function AdvisorScreen() {
               <div className="advice-content">
                 <h4>Recommended Action</h4>
                 <div className="recommended-action">
-                  <p className="action-type">{advice.action_type}</p>
-                  {advice.action_value && (
-                    <p className="action-value">{JSON.stringify(advice.action_value)}</p>
+                  <p className="action-type">{advice.action_type.replace(/_/g, " ")}</p>
+                  {advice.action_value !== null && advice.action_value !== undefined && (
+                    <p className="action-value">
+                      {advice.action_type === "BUILD_SETTLEMENT" || advice.action_type === "BUILD_CITY" 
+                        ? `Location marked with ⭐ on the board`
+                        : advice.action_type === "BUILD_ROAD"
+                        ? `Location marked in gold on the board`
+                        : JSON.stringify(advice.action_value)}
+                    </p>
                   )}
                 </div>
                 

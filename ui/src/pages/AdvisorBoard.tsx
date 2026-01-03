@@ -75,6 +75,9 @@ type AdvisorBoardProps = {
   setupPhase: string;
   highlightNodes: boolean;
   highlightEdges: boolean;
+  recommendedNode?: number | null;
+  recommendedEdge?: [number, number] | null;
+  recommendedTile?: TileCoordinate | null;
 };
 
 export default function AdvisorBoard({
@@ -91,6 +94,9 @@ export default function AdvisorBoard({
   setupPhase,
   highlightNodes,
   highlightEdges,
+  recommendedNode,
+  recommendedEdge,
+  recommendedTile,
 }: AdvisorBoardProps) {
   // Calculate board dimensions
   const containerWidth = 600;
@@ -268,6 +274,9 @@ export default function AdvisorBoard({
       {edgePositions.map(({ edgeId, x, y, rotation }) => {
         const edgeKey = `${Math.min(edgeId[0], edgeId[1])},${Math.max(edgeId[0], edgeId[1])}`;
         const edgeState = edgeStates.get(edgeKey);
+        const isRecommended = recommendedEdge && 
+          Math.min(recommendedEdge[0], recommendedEdge[1]) === Math.min(edgeId[0], edgeId[1]) &&
+          Math.max(recommendedEdge[0], recommendedEdge[1]) === Math.max(edgeId[0], edgeId[1]);
         
         return (
           <div
@@ -275,6 +284,7 @@ export default function AdvisorBoard({
             className={classnames("edge", {
               clickable: highlightEdges,
               highlighted: highlightEdges,
+              recommended: isRecommended,
             })}
             style={{
               left: x,
@@ -291,6 +301,9 @@ export default function AdvisorBoard({
             {highlightEdges && !edgeState?.color && (
               <div className="pulse" />
             )}
+            {isRecommended && !edgeState?.color && (
+              <div className="recommended-marker" />
+            )}
           </div>
         );
       })}
@@ -301,6 +314,7 @@ export default function AdvisorBoard({
         if (!pos) return null;
         
         const nodeState = nodeStates.get(node.id);
+        const isRecommended = recommendedNode === node.id;
         
         return (
           <div
@@ -308,6 +322,7 @@ export default function AdvisorBoard({
             className={classnames("node", {
               clickable: highlightNodes,
               highlighted: highlightNodes,
+              recommended: isRecommended,
             })}
             style={{
               left: pos.x,
@@ -323,6 +338,9 @@ export default function AdvisorBoard({
             )}
             {highlightNodes && !nodeState?.building && (
               <div className="pulse" />
+            )}
+            {isRecommended && (
+              <div className="recommended-marker">⭐</div>
             )}
           </div>
         );
