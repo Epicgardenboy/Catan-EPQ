@@ -120,9 +120,13 @@
     
     .recommended-marker {
       position: absolute;
-      font-size: 1.2rem;
+      width: 20px;
+      height: 20px;
+      background: gold;
+      border: 2px solid #333;
+      border-radius: 50%;
       animation: recommended-pulse 1s ease-in-out infinite;
-      filter: drop-shadow(0 0 4px gold);
+      box-shadow: 0 0 10px gold, 0 0 20px gold;
     }
   }
 

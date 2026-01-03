@@ -980,7 +980,7 @@ export default function AdvisorScreen() {
                   {advice.action_value !== null && advice.action_value !== undefined && (
                     <p className="action-value">
                       {advice.action_type === "BUILD_SETTLEMENT" || advice.action_type === "BUILD_CITY" 
-                        ? `Location marked with ⭐ on the board`
+                        ? `Location marked with gold circle on the board`
                         : advice.action_type === "BUILD_ROAD"
                         ? `Location marked in gold on the board`
                         : JSON.stringify(advice.action_value)}

@@ -340,7 +340,7 @@ export default function AdvisorBoard({
               <div className="pulse" />
             )}
             {isRecommended && (
-              <div className="recommended-marker">⭐</div>
+              <div className="recommended-marker" />
             )}
           </div>
         );
